@@ -47,16 +47,6 @@ public class MessageController {
     }
 
     /**
-     * 更新留言信息。
-     */
-    @PutMapping("/{messageId}")
-    public ResponseEntity<Message> updateMessage(@PathVariable Long messageId, @RequestBody Message message) {
-        message.setMessageID(messageId);
-        messageService.updateById(message);
-        return ResponseEntity.ok(message);
-    }
-
-    /**
      * 删除留言。
      */
     @DeleteMapping("/{messageId}")

@@ -25,5 +25,5 @@ public class Message {
     @TableField("content")
     private String content;
     @TableField("dateTime")
-    private LocalDateTime dateTime;
+    private LocalDateTime dateTime = LocalDateTime.now();
 }
