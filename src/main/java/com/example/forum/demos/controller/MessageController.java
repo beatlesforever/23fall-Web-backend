@@ -64,4 +64,5 @@ public class MessageController {
         messageService.removeById(messageId);
         return ResponseEntity.ok().build();
     }
+
 }

@@ -24,9 +24,9 @@ public class UserController {
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         boolean success = userService.register(user);
         if (success) {
-            return ResponseEntity.ok("User registered successfully");
+            return ResponseEntity.ok("注册成功");
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("用户名已存在");
     }
 
     @PostMapping("/login")
@@ -34,9 +34,9 @@ public class UserController {
         User user = userService.login(loginUser.getUsername(), loginUser.getPassword());
         if (user != null) {
             // 实现创建会话或生成令牌的逻辑
-            return ResponseEntity.ok("User logged in successfully");
+            return ResponseEntity.ok("登陆成功");
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("非法的用户名或密码");
     }
 
     /**
@@ -50,26 +50,17 @@ public class UserController {
     /**
      * 根据用户 ID 获取单个用户的信息。
      */
-    @GetMapping("/{userId}")
-    public ResponseEntity<User> getUserById(@PathVariable Long userId) {
-        return ResponseEntity.ok(userService.getById(userId));
-    }
-
-    /**
-     * 创建新用户。
-     */
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        userService.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    @GetMapping("/{userID}")
+    public ResponseEntity<User> getUserById(@PathVariable Long userID) {
+        return ResponseEntity.ok(userService.getById(userID));
     }
 
     /**
      * 更新用户信息。
      */
-    @PutMapping("/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestBody User user) {
-        user.setUserID(userId);
+    @PutMapping("/{userID}")
+    public ResponseEntity<User> updateUser(@PathVariable Long userID, @RequestBody User user) {
+        user.setUserID(userID);
         userService.updateById(user);
         return ResponseEntity.ok(user);
     }
@@ -77,9 +68,9 @@ public class UserController {
     /**
      * 删除用户。
      */
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
-        userService.removeById(userId);
+    @DeleteMapping("/{userID}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userID) {
+        userService.removeById(userID);
         return ResponseEntity.ok().build();
     }
 }

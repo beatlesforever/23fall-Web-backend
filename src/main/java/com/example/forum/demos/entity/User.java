@@ -1,5 +1,7 @@
 package com.example.forum.demos.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -12,10 +14,13 @@ import lombok.Data;
 @Data
 @TableName("Users")
 public class User {
-    @TableId("UserID")
+    @TableId(value = "userID",type = IdType.AUTO)
     private Long userID;
+    @TableField("username")
     private String username;
+    @TableField("password")
     private String password;
+    @TableField("email")
     private String email;
     // 其他属性
 }

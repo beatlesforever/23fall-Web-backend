@@ -5,8 +5,9 @@ import com.example.forum.demos.entity.User;
 import com.example.forum.demos.mapper.UserMapper;
 import com.example.forum.demos.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 /**
  * @author zhouhaoran
@@ -18,18 +19,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements IUs
     @Autowired
     private UserMapper userMapper;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Override
     public boolean register(User user) {
         // 实现注册逻辑
         if (userExists(user.getUsername())) {
             return false;
         }
-
-        String hashedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(hashedPassword);
+        user.setPassword(user.getPassword());
         userMapper.insert(user);
         return true;
     }
@@ -41,7 +37,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper,User> implements IUs
 
     public User login(String username, String password) {
         User user = userMapper.findByUsername(username);
-        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+        if (user != null && Objects.equals(password, user.getPassword())) {
             // 密码匹配，登录成功
             return user;
         }

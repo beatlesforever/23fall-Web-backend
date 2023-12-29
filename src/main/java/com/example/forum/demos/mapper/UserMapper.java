@@ -12,6 +12,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface UserMapper extends BaseMapper<User> {
-    @Select("SELECT * FROM user WHERE username = #{username}")
+    @Select("SELECT * FROM Users WHERE username = #{username}")
     User findByUsername(String username);
 }

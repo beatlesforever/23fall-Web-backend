@@ -67,5 +67,26 @@ public class PostController {
         postService.removeById(postID);
         return ResponseEntity.ok().build();  //返回一个状态码为 200（OK） 的 HTTP 响应。
     }
+
+    @GetMapping("/user/{userID}")
+    public ResponseEntity<List<Post>> getPostsByUser(@PathVariable Long userID) {
+        List<Post> userPosts = postService.getPostsByUserId(userID);
+        if (!userPosts.isEmpty()) {
+            return ResponseEntity.ok(userPosts);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/search/{query}")
+    public ResponseEntity<List<Post>> searchPostsByTitle(@PathVariable String query) {
+        List<Post> searchedPosts = postService.searchPostsByTitle(query);
+        if (!searchedPosts.isEmpty()) {
+            return ResponseEntity.ok(searchedPosts);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }
 
