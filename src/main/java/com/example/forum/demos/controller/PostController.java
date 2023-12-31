@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -67,14 +68,20 @@ public class PostController {
      * 创建帖子
      */
     @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody Post post) {
+    public ResponseEntity<Post> createPost(@RequestBody Post post, HttpServletRequest request) {
+        if (request.getSession().getAttribute("user") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
         post.setDateTime(LocalDateTime.now()); // 设置当前时间
         postService.save(post);
         return ResponseEntity.status(HttpStatus.CREATED).body(post);
     }
 
     @PutMapping("/{postID}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long postID, @RequestBody Post postUpdate) {
+    public ResponseEntity<Post> updatePost(@PathVariable Long postID, @RequestBody Post postUpdate, HttpServletRequest request) {
+        if (request.getSession().getAttribute("user") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
         Post existingPost = postService.getById(postID);
         if (existingPost == null) {
             return ResponseEntity.notFound().build();
@@ -95,7 +102,10 @@ public class PostController {
      * 删除帖子
      */
     @DeleteMapping("/{postID}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long postID) {
+    public ResponseEntity<Void> deletePost(@PathVariable Long postID, HttpServletRequest request) {
+        if (request.getSession().getAttribute("user") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         postService.removeById(postID);
         return ResponseEntity.ok().build();  //返回一个状态码为 200（OK） 的 HTTP 响应。
     }

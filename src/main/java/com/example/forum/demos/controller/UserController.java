@@ -6,8 +6,10 @@ import com.example.forum.demos.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,16 +34,15 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody User loginUser) {
+    public ResponseEntity<?> loginUser(@RequestBody User loginUser, HttpServletRequest request) {
         User user = userService.login(loginUser.getUsername(), loginUser.getPassword());
         if (user != null) {
+            request.getSession().setAttribute("user", user); // 在会话中存储用户信息
             UserDTO dto = convertToDto(user);
-            // 实现创建会话或生成令牌的逻辑
             return ResponseEntity.ok(dto);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("非法的用户名或密码");
     }
-
     /**
      * 获取所有用户的信息。
      */
@@ -84,6 +85,13 @@ public class UserController {
         userService.removeById(userID);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser(HttpServletRequest request) {
+        request.getSession().invalidate(); // 销毁会话
+        return ResponseEntity.ok("注销成功");
+    }
+
     // 将 User 对象转换为 UserDTO 对象
     private UserDTO convertToDto(User user) {
         UserDTO dto = new UserDTO();
