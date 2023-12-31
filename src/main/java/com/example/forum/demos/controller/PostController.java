@@ -3,6 +3,8 @@ package com.example.forum.demos.controller;
 import com.example.forum.demos.entity.Post;
 import com.example.forum.demos.service.IPostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -63,21 +66,6 @@ public class PostController {
     /**
      * 创建帖子
      */
-//    @PostMapping
-//    public ResponseEntity<Post> createPost(@RequestParam("title") String title,
-//                                           @RequestParam("content") String content,
-//                                           @RequestParam("userID") Long userID,
-//                                           @RequestParam("imagePaths") List<String> imagePaths) {
-//        Post post = new Post();
-//        post.setTitle(title);
-//        post.setContent(content);
-//        post.setUserID(userID);
-//        post.setDateTime(LocalDateTime.now()); // 设置当前时间
-//        post.setImagePathArray(imagePaths.toArray(new String[0]));
-//
-//        postService.save(post);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(post);
-//    }
     @PostMapping
     public ResponseEntity<Post> createPost(@RequestBody Post post) {
         post.setDateTime(LocalDateTime.now()); // 设置当前时间
@@ -133,7 +121,7 @@ public class PostController {
     }
     // 文件处理方法
     private List<String> uploadImages(MultipartFile[] files) {
-        List<String> filePaths = new ArrayList<>();
+        List<String> fileNames = new ArrayList<>();
         for (MultipartFile file : files) {
             if (!file.isEmpty()) {
                 try {
@@ -153,14 +141,36 @@ public class PostController {
                     Path filePath = uploadPath.resolve(newFileName);
                     Files.copy(file.getInputStream(), filePath);
 
-                    filePaths.add(filePath.toString());
+                    fileNames.add(newFileName); // 仅保存文件名
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
             }
         }
-        return filePaths;
+        return fileNames;
     }
+    /**
+     * 返回图片内容
+     * @param filename 图片文件的名称
+     * @return 图片文件的响应实体
+     */
+    @GetMapping("/images/{filename:.+}")
+    public ResponseEntity<Resource> getImage(@PathVariable String filename) {
+        Path filePath = Paths.get(UPLOAD_DIR).resolve(filename);
+        try {
+            Resource resource = new UrlResource(filePath.toUri());
+            if (resource.exists() || resource.isReadable()) {
+                return ResponseEntity.ok().body(resource);
+            } else {
+                // 如果文件不存在或不可读，则返回404
+                return ResponseEntity.notFound().build();
+            }
+        } catch (MalformedURLException e) {
+            // 如果URL构造失败，则返回服务器错误
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     // 删除旧图片文件的方法
     private void deleteOldImages(String[] oldImagePaths) {
         if (oldImagePaths == null) return;
