@@ -26,7 +26,19 @@ public class Post {
     private LocalDateTime dateTime;
     @TableField("userID")
     private Long userID;
-    @TableField("imageID")
-    private Long imageID;
+    @TableField("imagePaths")
+    private String imagePaths; // 存储多个图片路径，用逗号分隔
+
+    // 不映射到数据库的字段，仅用于应用逻辑
+    @TableField(exist = false)
+    private String[] imagePathArray;
+
+    public String[] getImagePathArray() {
+        return imagePaths != null ? imagePaths.split(",") : new String[0];
+    }
+
+    public void setImagePathArray(String[] imagePathArray) {
+        this.imagePaths = String.join(",", imagePathArray);
+    }
     // 其他属性
 }
