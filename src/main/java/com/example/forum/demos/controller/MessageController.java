@@ -2,6 +2,7 @@ package com.example.forum.demos.controller;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.forum.demos.entity.Message;
+import com.example.forum.demos.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,11 @@ public class MessageController {
      * 获取所有留言信息。
      */
     @GetMapping
-    public ResponseEntity<List<Message>> getAllMessages() {
+    public ResponseEntity<List<Message>> getAllMessages(HttpServletRequest request) {
+        if (request.getSession().getAttribute("user") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         return ResponseEntity.ok(messageService.list());
     }
 
@@ -43,9 +48,11 @@ public class MessageController {
      */
     @PostMapping
     public ResponseEntity<Message> createMessage(@RequestBody Message message, HttpServletRequest request) {
-        if (request.getSession().getAttribute("user") == null) {
+        User currentUser = (User) request.getSession().getAttribute("user");
+        if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
+        message.setSenderID(currentUser.getUserID()); // 假设有一个senderId字段
         messageService.save(message);
         return ResponseEntity.status(HttpStatus.CREATED).body(message);
     }

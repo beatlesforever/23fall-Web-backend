@@ -47,12 +47,15 @@ public class UserController {
      * 获取所有用户的信息。
      */
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
+    public ResponseEntity<List<UserDTO>> getAllUsers(HttpServletRequest request) {
+        if (request.getSession().getAttribute("user") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         List<User> users = userService.list();
         List<UserDTO> dtos = users.stream().map(this::convertToDto).collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
-
 
     /**
      * 根据用户 ID 获取单个用户的信息。
@@ -60,6 +63,10 @@ public class UserController {
     @GetMapping("/{userID}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long userID) {
         User user = userService.getById(userID);
+        if (user == null) {
+            // 用户不存在，返回404 Not Found
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
         UserDTO userDTO = convertToDto(user);
         return ResponseEntity.ok(userDTO);
     }
@@ -68,9 +75,14 @@ public class UserController {
      * 更新用户信息。
      */
     @PutMapping("/{userID}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long userID, @RequestBody User user) {
-        user.setUserID(userID);
-        userService.updateById(user);
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long userID, @RequestBody User user, HttpServletRequest request) {
+        User currentUser = (User) request.getSession().getAttribute("user");
+        if (currentUser == null || !currentUser.getUserID().equals(userID)) {
+            // 用户未登录或尝试更新其他用户的信息
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+        user.setUserID(currentUser.getUserID());
+        userService.updateById(user);//不能写成user，因为请求里面没有id...
         User updatedUser = userService.getById(userID);
         UserDTO dto = convertToDto(updatedUser);
         return ResponseEntity.ok(dto);
@@ -81,7 +93,12 @@ public class UserController {
      * 删除用户。
      */
     @DeleteMapping("/{userID}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long userID) {
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userID, HttpServletRequest request) {
+        User currentUser = (User) request.getSession().getAttribute("user");
+        if (currentUser == null || !currentUser.getUserID().equals(userID)) {
+            // 用户未登录或尝试删除其他用户
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         userService.removeById(userID);
         return ResponseEntity.ok().build();
     }

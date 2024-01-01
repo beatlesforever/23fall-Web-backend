@@ -1,6 +1,7 @@
 package com.example.forum.demos.controller;
 
 import com.example.forum.demos.entity.Post;
+import com.example.forum.demos.entity.User;
 import com.example.forum.demos.service.IPostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -39,16 +40,23 @@ public class PostController {
      * 获取帖子列表
      */
     @GetMapping
-    public ResponseEntity<List<Post>> getAllPosts() {
+    public ResponseEntity<List<Post>> getAllPosts(HttpServletRequest request) {
+        if (request.getSession().getAttribute("user") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         List<Post> posts = postService.list();
         return ResponseEntity.ok(posts);
     }
-
     /**
      * 获取特定帖子
      */
     @GetMapping("/{postID}")
-    public ResponseEntity<Post> getPostById(@PathVariable Long postID) {
+    public ResponseEntity<Post> getPostById(@PathVariable Long postID, HttpServletRequest request) {
+        if (request.getSession().getAttribute("user") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         Post post = postService.getById(postID);
         return ResponseEntity.ok(post);
     }
@@ -69,9 +77,11 @@ public class PostController {
      */
     @PostMapping
     public ResponseEntity<Post> createPost(@RequestBody Post post, HttpServletRequest request) {
-        if (request.getSession().getAttribute("user") == null) {
+        User currentUser = (User) request.getSession().getAttribute("user");
+        if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
+        post.setUserID(currentUser.getUserID()); // 从会话中获取用户ID
         post.setDateTime(LocalDateTime.now()); // 设置当前时间
         postService.save(post);
         return ResponseEntity.status(HttpStatus.CREATED).body(post);
@@ -111,7 +121,11 @@ public class PostController {
     }
 
     @GetMapping("/user/{userID}")
-    public ResponseEntity<List<Post>> getPostsByUser(@PathVariable Long userID) {
+    public ResponseEntity<List<Post>> getPostsByUser(@PathVariable Long userID, HttpServletRequest request) {
+        if (request.getSession().getAttribute("user") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         List<Post> userPosts = postService.getPostsByUserId(userID);
         if (!userPosts.isEmpty()) {
             return ResponseEntity.ok(userPosts);
