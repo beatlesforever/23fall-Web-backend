@@ -34,11 +34,17 @@ public class Post {
     private String[] imagePathArray;
 
     public String[] getImagePathArray() {
-        return imagePaths != null ? imagePaths.split(",") : new String[0];
+        // 当imagePaths为空或仅包含空白时，返回空数组
+        return (imagePaths == null || imagePaths.trim().isEmpty()) ? new String[0] : imagePaths.split(",");
     }
 
     public void setImagePathArray(String[] imagePathArray) {
-        this.imagePaths = String.join(",", imagePathArray);
+        // 当imagePathArray为空或第一个元素为空字符串时，设置imagePaths为null或空字符串
+        if (imagePathArray == null || imagePathArray.length == 0 || imagePathArray[0].isEmpty()) {
+            this.imagePaths = "";
+        } else {
+            this.imagePaths = String.join(",", imagePathArray);
+        }
     }
-    // 其他属性
+
 }

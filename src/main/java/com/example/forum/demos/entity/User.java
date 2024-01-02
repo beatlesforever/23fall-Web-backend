@@ -22,5 +22,6 @@ public class User {
     private String password;
     @TableField("email")
     private String email;
-    // 其他属性
+    @TableField("avatarPath")
+    private String avatarPath;
 }

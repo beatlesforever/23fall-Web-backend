@@ -61,7 +61,6 @@ public class PostController {
         return ResponseEntity.ok(post);
     }
 
-
     @PostMapping("/uploadImage")
     public ResponseEntity<List<String>> uploadImage(@RequestParam("files") MultipartFile[] files) {
         List<String> filePaths = uploadImages(files);
@@ -81,6 +80,12 @@ public class PostController {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
+        // 检查 imagePathArray 是否有效
+        if (post.getImagePathArray() != null && (post.getImagePathArray().length == 0 || post.getImagePathArray()[0].isEmpty())) {
+            post.setImagePathArray(new String[0]); // 设置为一个空数组
+
+        }
+
         post.setUserID(currentUser.getUserID()); // 从会话中获取用户ID
         post.setDateTime(LocalDateTime.now()); // 设置当前时间
         postService.save(post);
