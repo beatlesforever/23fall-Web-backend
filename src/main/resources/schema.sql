@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS Users (
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(255),
-    avatarPath VARCHAR(255); -- 存储用户头像的URL或文件路径
+    avatarPath VARCHAR(255)-- 存储用户头像的URL或文件路径
 -- 其他个人信息的字段定义
     -- ...
     );
