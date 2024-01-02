@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -81,6 +82,16 @@ public class UserController {
             // 用户未登录或尝试更新其他用户的信息
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+        // 如果请求体中没有密码字段，不修改密码
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            user.setPassword(currentUser.getPassword());
+        } else {
+            // 对新密码进行加密处理
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
         user.setUserID(currentUser.getUserID());
         userService.updateById(user);//不能写成user，因为请求里面没有id...
         User updatedUser = userService.getById(userID);
