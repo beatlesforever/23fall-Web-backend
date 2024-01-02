@@ -115,6 +115,7 @@ public class UserController {
         dto.setUserID(user.getUserID());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
+        dto.setAvatarPath(user.getAvatarPath());
         // 设置其他字段
         return dto;
     }
